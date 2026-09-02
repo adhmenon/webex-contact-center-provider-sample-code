@@ -605,6 +605,20 @@ h3:hover .heading-anchor,
   margin: 0;
 }
 
+.guide-content > p:has(> img:only-child) {
+  max-width: 100%;
+}
+
+.guide-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 1.4rem 0 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface);
+}
+
 code,
 kbd {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;

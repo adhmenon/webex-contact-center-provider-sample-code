@@ -22,8 +22,8 @@ for (const requiredText of [
   'Build a BYOVA connector over WebSocket',
   'a38a10b7-43e4-4676-a076-a7d6dce9387d',
   'id="create-the-service-app"',
-  'id="implement-v1va-connection-and-envelope-lifecycle"',
-  'id="prepare-for-production"',
+  'id="implement-the-websocket-contract"',
+  'id="validate-before-production"',
   'class="toc-link"',
 ]) {
   if (!html.includes(requiredText)) {
