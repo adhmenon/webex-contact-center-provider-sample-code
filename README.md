@@ -12,6 +12,7 @@ This repository is intentionally split by **feature** and by **transport**. Each
 
 - [Features at a Glance](#features-at-a-glance)
 - [Picking a Sample](#picking-a-sample)
+- [Documentation Site](#documentation-site)
 - [Common Prerequisites](#common-prerequisites)
 - [Cross-cutting Topics](#cross-cutting-topics)
 - [Support, Contributing, and License](#support-contributing-and-license)
@@ -75,6 +76,28 @@ Pick the simulator whose feature, schema, language, and transport match your tar
 | Real-Time Media Forking | gRPC | Protobuf | Java | [`media-forking/simulators/media-forking-java/`](./media-forking/simulators/media-forking-java/) |
 
 Every simulator is self-contained — clone the repo, follow the **Quick Start** in that simulator's README, and you'll have a server listening locally in one command (`./mvnw spring-boot:run` for Java, `./run.sh` for Python).
+
+---
+
+## Documentation Site
+
+The end-to-end BYOVA over WebSocket guide is also available as a responsive, searchable GitHub Pages site. The site is generated from the canonical Markdown at [`bring-your-own/virtual-agent/web-socket-interface/README.md`](./bring-your-own/virtual-agent/web-socket-interface/README.md), so the repository guide remains the single source of truth.
+
+Build and verify the site locally with Node.js 24:
+
+```bash
+npm install
+npm run pages:build
+npm run pages:check
+```
+
+The generated site is written to the ignored `_site/` directory. To preview it locally, run:
+
+```bash
+ruby -run -e httpd _site -p 4173
+```
+
+The [Pages deployment workflow](./.github/workflows/pages.yml) builds, checks, and publishes the site when relevant files reach `main`, or when the workflow is manually dispatched. Before the first deployment, a repository owner must select **GitHub Actions** under **Settings > Pages > Build and deployment > Source**.
 
 ---
 

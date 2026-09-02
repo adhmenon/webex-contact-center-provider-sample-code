@@ -1,0 +1,14 @@
+{
+  "name": "webex-contact-center-provider-sample-code-docs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static GitHub Pages build for the BYOVA WebSocket development guide.",
+  "scripts": {
+    "pages:build": "node scripts/build-pages.mjs",
+    "pages:check": "node scripts/check-pages.mjs"
+  },
+  "devDependencies": {
+    "marked": "18.0.11"
+  }
+}

@@ -51,3 +51,8 @@ ccai-bom/.flattened-pom.xml
 
 ### Codex ###
 .codex/
+
+### GitHub Pages ###
+node_modules/
+_site/
+.playwright-cli/

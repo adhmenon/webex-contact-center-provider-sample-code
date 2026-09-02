@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="End-to-end development, onboarding, protocol, validation, and production guide for a Webex Contact Center BYOVA connector over WebSocket.">
+    <meta name="theme-color" content="oklch(1 0 0)">
+    <title>{{TITLE}} · Webex Contact Center provider guides</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./assets/styles.css">
+    <script>
+      (() => {
+        const saved = localStorage.getItem('byova-theme');
+        const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = saved || preferred;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#guide">Skip to guide</a>
+    <div class="reading-progress" aria-hidden="true"><span></span></div>
+
+    <header class="site-header">
+      <a class="site-brand" href="./" aria-label="BYOVA provider guide home">
+        <span class="brand-mark" aria-hidden="true">WS</span>
+        <span>
+          <strong>Webex Contact Center</strong>
+          <small>Provider development guides</small>
+        </span>
+      </a>
+      <nav class="header-actions" aria-label="Site actions">
+        <a class="header-link" href="https://github.com/adhmenon/webex-contact-center-provider-sample-code/tree/main/bring-your-own/virtual-agent/web-socket-interface">View source</a>
+        <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch color theme">
+          <span class="theme-icon" aria-hidden="true"></span>
+        </button>
+        <button class="menu-button" id="menu-toggle" type="button" aria-label="Open guide navigation" aria-controls="guide-navigation" aria-expanded="false">
+          <span aria-hidden="true"></span>
+          <span class="menu-label">Contents</span>
+        </button>
+      </nav>
+    </header>
+
+    <button class="navigation-scrim" id="navigation-scrim" type="button" aria-label="Close guide navigation"></button>
+
+    <div class="page-shell">
+      <aside class="guide-navigation" id="guide-navigation" aria-label="Guide contents">
+        <div class="navigation-heading">
+          <p>In this guide</p>
+          <button class="navigation-close" id="navigation-close" type="button" aria-label="Close guide navigation">×</button>
+        </div>
+        <label class="search-label" for="guide-search">Filter sections</label>
+        <div class="search-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+          <input id="guide-search" type="search" placeholder="Try “data source”" autocomplete="off">
+        </div>
+        <p class="search-status" id="search-status" aria-live="polite"></p>
+        <ol class="toc-list" id="toc-list">
+          {{TABLE_OF_CONTENTS}}
+        </ol>
+      </aside>
+
+      <main id="guide">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="https://github.com/adhmenon/webex-contact-center-provider-sample-code">Provider samples</a>
+          <span aria-hidden="true">/</span>
+          <span>BYOVA</span>
+          <span aria-hidden="true">/</span>
+          <span>WebSocket</span>
+        </nav>
+
+        <section class="guide-hero" aria-labelledby="page-title">
+          <div class="hero-copy">
+            <p class="guide-type">End-to-end implementation guide</p>
+            <h1 id="page-title">{{TITLE}}</h1>
+            <div class="hero-lead">{{LEAD}}</div>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#what-you-will-build">Start with the architecture</a>
+              <a class="button button-secondary" href="https://github.com/adhmenon/webex-contact-center-provider-sample-code/tree/main/bring-your-own/virtual-agent/web-socket-interface/simulators/byova-websocket-json-java">Open the Java sample</a>
+            </div>
+          </div>
+          <dl class="contract-summary" aria-label="WebSocket contract summary">
+            <div>
+              <dt>Schema</dt>
+              <dd><code>a38a10b7…9387d</code></dd>
+            </div>
+            <div>
+              <dt>Conversation</dt>
+              <dd><code>/v1/va</code></dd>
+            </div>
+            <div>
+              <dt>Catalog</dt>
+              <dd><code>/v1/listVirtualAgents</code></dd>
+            </div>
+          </dl>
+        </section>
+
+        <article class="guide-content">
+          {{ARTICLE}}
+        </article>
+
+        <footer class="guide-footer">
+          <p>This site is generated from the repository’s canonical BYOVA WebSocket guide.</p>
+          <div>
+            <a href="https://developer.webex.com/mcp/docs/bring-your-own-virtual-agent-over-websocket">Official Webex documentation</a>
+            <a href="https://github.com/adhmenon/webex-contact-center-provider-sample-code/issues">Report a documentation issue</a>
+          </div>
+        </footer>
+      </main>
+    </div>
+
+    <button class="back-to-top" id="back-to-top" type="button" aria-label="Back to top">↑</button>
+    <script src="./assets/site.js" defer></script>
+  </body>
+</html>
