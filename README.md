@@ -83,9 +83,9 @@ Every simulator is self-contained — clone the repo, follow the **Quick Start**
 You only need the Webex side of the integration once per tenant. The detailed step-by-step (with Control Hub screenshots and `curl` examples) lives in the feature READMEs — at the high level:
 
 1. A **Webex Contact Center tenant** with an admin who can approve Service Apps and create flows.
-2. An authorized **Webex Service App** scoped to the [Bring Your Own Data Source (BYoDS)](https://developer.webex.com/webex-contact-center/docs/api/v1/data-sources) APIs, with the **valid domains** your service will be reachable on.
+2. An authorized **Webex Service App** scoped to the [Bring Your Own Data Source (BYoDS)](https://developer.webex.com/admin/docs/api/v1/data-sources) APIs, with the partner **Data Exchange Domain** that hosts your service.
 3. A **registered data source** of the correct schema for the feature you're integrating (one for BYoVA, one for Media Forking — schema UUIDs are documented in the [WxCC schema catalog](https://github.com/webex/dataSourceSchemas)).
-4. A **Config / Flow** in Control Hub that selects the authorized Service App and routes the call to your feature (Virtual Agent V2 activity for BYoVA, Media Forking activity for forking).
+4. A **Config / Flow** in Control Hub that selects the authorized Service App and routes the call to your feature (Virtual Agent Voice activity for BYoVA, Media Forking activity for forking).
 
 ---
 
@@ -93,19 +93,15 @@ You only need the Webex side of the integration once per tenant. The detailed st
 
 ### Runtime Authentication (JWS / JWT)
 
-Every WxCC connection — gRPC or WebSocket — carries a **JWS** issued at data-source registration time. Your server must validate it (signature against the Webex Identity Broker JWKS, expiration, required claims, datasource binding) before accepting any payload. Each Java simulator includes sample interceptor code you can use as a starting point. See the JWS section in any feature README for the full contract.
+Every WxCC connection — gRPC or WebSocket — carries a **JWS** derived from the current data-source registration. Your server must validate the bearer token presented on the connection, including its signature against the Webex Identity Broker JWKS, expiration, required claims, and data-source binding. Do not authenticate by comparing the token with a value saved from the registration response; updating the data source rotates the runtime token. Each Java simulator includes validation code you can use as a starting point. See the JWS section in the feature README for the full contract.
 
 ### mTLS Support
 
-WxCC supports mutual TLS as an extra transport-layer auth check on top of (not in place of) JWS. See [`mtls-authentication.md`](./mtls-authentication.md) for the certificate exchange, supported features, and configuration steps.
+WxCC supports mutual TLS as an extra transport-layer authentication check for the gRPC BYoVA variant. It does not apply to BYoVA over WebSocket and never replaces JWS validation. See [`mtls-authentication.md`](./mtls-authentication.md) for the supported gRPC flow.
 
-### Audio / runtime constraints (apply to BYoVA + Media Forking)
+### Audio and runtime constraints
 
-- **Sample rate:** 8 kHz or 16 kHz, mono.
-- **Encoding:** Linear16 or G.711 µ-law (Media Forking also supports A-law).
-- **Language code:** `en-US` for BYoVA (additional locales are added per release — confirm in your tenant's docs).
-
-Per-feature audio-format details (WAV vs raw PCM, framing, headers) live in the feature READMEs.
+Audio requirements are transport-specific. BYoVA over WebSocket currently uses raw G.711 mu-law at 8 kHz, mono, with no WAV or RIFF header. The gRPC BYoVA and Media Forking variants have their own qualified formats. Follow the interface README for the selected schema instead of inferring support from codec enums in another schema.
 
 ---
 

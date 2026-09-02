@@ -8,12 +8,12 @@ A reference implementation of the Webex Contact Center **Bring-Your-Own-Virtual-
 The sample handles the same three input types the WxCC platform sends:
 
 - **Event input** (`SESSION_START`, `NO_INPUT`, `CUSTOM_EVENT`, …)
-- **Audio input** — µ-law 8 kHz caller audio, silence-detected, buffered, and echoed back in either chunked or single-WAV mode.
-- **DTMF input** — digits mapped to pre-recorded audio prompts; `0` triggers `TRANSFER_TO_AGENT`, `*` triggers `SESSION_END`.
+- **Audio input** — mu-law 8 kHz caller audio, silence-detected, buffered, and echoed back in chunked mode.
+- **DTMF input** — digits mapped to pre-recorded audio prompts; `5` triggers `TRANSFER_TO_AGENT`, and `*` triggers `SESSION_END`.
 
-The sample is deliberately self-contained — prompts are loaded from the classpath under `src/main/resources/audio/` — so it can be run as a smoke test for a BYoVA integration without any external services.
+The sample is deliberately self-contained — prompts are loaded from the classpath under `src/main/resources/audio/` — so it can be run as a local smoke test without an external AI service. It is not a production-ready connector or a complete conformance implementation. Review [Production gaps to address](#production-gaps-to-address) before adapting it.
 
-For the underlying call-flow contract, see the [parent BYoVA README](../../../README.md).
+For the underlying call-flow contract, see the [BYoVA over WebSocket development guide](../../README.md).
 
 ## Table of Contents
 
@@ -24,20 +24,19 @@ For the underlying call-flow contract, see the [parent BYoVA README](../../../RE
 - [Configuration](#configuration)
 - [Authentication (JWS / JWT validation)](#authentication-jws--jwt-validation)
 - [Extending the Sample](#extending-the-sample)
+- [Production gaps to address](#production-gaps-to-address)
 
 ## Prerequisites
 
 - **JDK 21 or later** (the project pins `java.version=21`).
-- **Maven 3.9+** (required by Spring Boot 4).
 - **Network access to Maven Central** the first time you build, to download Spring Boot, Jackson, Nimbus JOSE+JWT, and Lombok.
-- *(Optional)* **Docker / Docker Compose** if you want to run the containerised version.
 
 ## Quick Start
 
-Run the server straight from source on port `8086`:
+Run the server from source on port `8086` with authentication disabled for this loopback-only test:
 
 ```bash
-mvn spring-boot:run
+AUTH_ENABLED=false ./mvnw spring-boot:run
 ```
 
 Once you see `Tomcat started on port 8086`, open a WebSocket connection (e.g. with `wscat`):
@@ -50,7 +49,7 @@ wscat -c ws://localhost:8086/v1/va -H "Authorization: Bearer <jwt>"
 wscat -c ws://localhost:8086/v1/listVirtualAgents -H "Authorization: Bearer <jwt>"
 ```
 
-> The `Authorization` header is required unless you set `auth.enabled=false` for local development — see [Authentication](#authentication-jws--jwt-validation).
+> **Warning:** Disable authentication only for loopback testing. Configure JWS validation before you expose the server through a tunnel or public ingress.
 
 ## Project Layout
 
@@ -88,7 +87,7 @@ byova-websocket-json-java/
 ## Building a JAR
 
 ```bash
-mvn clean package -DskipTests
+./mvnw clean package -DskipTests
 java -jar target/byova-websocket-json-java-1.0.0.jar
 ```
 
@@ -104,7 +103,7 @@ All knobs are exposed through Spring Boot configuration; see [`src/main/resource
 | `spring.websocket.max-binary-message-buffer-size` | `10485760` | Max binary frame size (10 MB)                            |
 | `spring.websocket.max-session-idle-timeout`   | `900000` | Session idle timeout (15 min)                                |
 | `voice.va.input.timeout-millis`               | `10000` | Complete/incomplete speech timeout reported to WxCC          |
-| `voice.va.audio.use-chunked-audio`            | `true`  | `true` → emit `CHUNK` responses; `false` → single WAV `FINAL`|
+| `voice.va.audio.use-chunked-audio`            | `true`  | Emit raw-audio `CHUNK` responses. Keep this `true` for the current WebSocket media profile. The legacy `false` path adds a WAV header and is not compatible with the current profile. |
 | `voice.va.audio.amplitude-threshold`          | `2000`  | PCM absolute amplitude above which a sample is "speech"      |
 | `voice.va.audio.write-to-file`                | `false` | Persist captured caller audio to `~/recorded-audio/`         |
 | `voice.va.dtmf.input-length`                  | `9`     | Max digits reported to WxCC                                  |
@@ -139,18 +138,18 @@ In any deployed environment you must set:
 
 ```properties
 auth.enabled=true
-auth.datasource-url=https://<your-public-byova-host>:443
-auth.datasource-schema-uuid=<your-byova-schema-uuid>
+auth.datasource-url=wss://<your-public-byova-host>
+auth.datasource-schema-uuid=a38a10b7-43e4-4676-a076-a7d6dce9387d
 ```
 
-`datasource-url` and `datasource-schema-uuid` must match the values produced when you register the data source in Control Hub (see [`bring-your-own/virtual-agent/README.md`](../../../README.md) for the onboarding flow). The shipped `application.properties` contains obvious placeholder values that **must** be replaced — leaving them in place will reject every legitimate token.
+`datasource-url` and `datasource-schema-uuid` must match the values produced when you register the data source (see the [BYoVA over WebSocket development guide](../../README.md) for the onboarding flow). The shipped `application.properties` contains obvious placeholder values that **must** be replaced — leaving them in place will reject every legitimate token.
 
 ### Disabling for local development
 
 Setting `auth.enabled=false` skips validation entirely. Use this **only** for local smoke tests with `wscat` or a test client; never disable it in any environment that reaches the public Internet or the Webex CC platform.
 
 ```bash
-AUTH_ENABLED=false mvn spring-boot:run
+AUTH_ENABLED=false ./mvnw spring-boot:run
 ```
 
 ### Where to extend it
@@ -160,6 +159,20 @@ AUTH_ENABLED=false mvn spring-boot:run
 
 ## Extending the Sample
 
-- **Connect a real speech service** — replace the audio echo logic in `service/AudioStreamingService` with calls to your ASR/NLU engine, and stream its responses back as WAV or `CHUNK` envelopes.
+- **Connect a real speech service** — replace the audio echo logic in `service/AudioStreamingService` with calls to your ASR/NLU engine, and stream raw G.711 mu-law audio in `CHUNK` envelopes followed by one `FINAL` response.
 - **Add TLS termination** — Spring Boot exposes the standard `server.ssl.*` properties; configure a keystore to terminate TLS in-process or, more commonly, terminate at your ingress and forward over plain HTTP on a private network.
 - **Change the virtual-agent catalog** — override `service/VirtualAgentProcessor#sendVirtualAgentsList` to return your own list (e.g. fetched from a database).
+
+## Production gaps to address
+
+Treat the sample as a code-navigation aid. Before connecting a Webex Contact Center tenant, address these gaps:
+
+| Area | Current sample behavior | Required production work |
+| --- | --- | --- |
+| Response envelope | Response builders do not populate the required `seq`, `ts`, and `conversation_id` fields. | Maintain a per-connection outbound sequence counter, add an RFC 3339 timestamp, and return the connection's conversation ID on every response and error. |
+| Application heartbeat | The handler logs an application `PING` but does not send the required application `PONG`. Its `handlePongMessage` method handles protocol-level WebSocket pong frames only. | Send a schema-valid `PONG` that echoes the application `PING` sequence number. Test timeout behavior. |
+| Audio | Chunked mode sends raw audio, but the legacy non-chunked path prepends a WAV header. | Keep raw-audio chunking enabled or replace the legacy path. Never send WAV or RIFF headers for the current media profile. |
+| Authentication | The sample verifies a signature, expiry, issuer presence, required claims, and data-source binding. It does not implement every production hardening control. | Validate the issuer before network access, pin the accepted algorithm, select the expected `kid`, validate the exact audience and subject, enforce network timeouts, and define JWKS rotation and failure policy. |
+| Concurrency | Some demonstration state is held in singleton service fields. | Keep conversation, DTMF, audio, and sequence state isolated per WebSocket connection. |
+| Operations | TLS termination, load-balancer behavior, draining, capacity limits, and alerts are deployment-specific. | Test one long-lived connection per active conversation, graceful draining, message limits, backpressure, and failure handling at production scale. |
+| Tests | The module does not currently contain automated conformance tests. | Add schema validation and end-to-end tests for the lifecycle, media, events, heartbeats, errors, and connection closure. |
