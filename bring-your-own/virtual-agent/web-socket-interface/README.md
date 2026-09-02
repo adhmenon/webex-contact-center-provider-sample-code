@@ -58,7 +58,7 @@ Create the app as the provider developer:
 5. Under **Bring Your Own Datasource Settings**, select these scopes:
    - `spark-admin:datasource_read`
    - `spark-admin:datasource_write`
-6. Select **Data Exchange Schema** `a38a10b7-43e4-4676-a076-a7d6dce9387d`.
+6. Under **Data Exchange Schema**, select **VoiceVirtualAgent_WebSocket**, the WebSocket virtual-agent schema with the `web-socket` protocol for a Service App.
 7. Enter the partner-owned **Data Exchange Domain**, such as `byova.example.com`. Enter the domain only: omit the scheme, port, path, and wildcard characters.
 8. Save the Service App.
 
