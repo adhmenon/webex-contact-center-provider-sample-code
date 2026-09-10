@@ -120,7 +120,7 @@ Every WxCC connection — gRPC or WebSocket — carries a **JWS** derived from t
 
 ### mTLS Support
 
-WxCC supports mutual TLS as an extra transport-layer authentication check for the gRPC BYoVA variant. It does not apply to BYoVA over WebSocket and never replaces JWS validation. See [`mtls-authentication.md`](./mtls-authentication.md) for the supported gRPC flow.
+WxCC supports mutual TLS as an extra transport-layer authentication check for the gRPC BYoVA variant. Current WebSocket integrations use server-authenticated TLS plus JWS validation; use the WebSocket setup guidance for the target environment as WebSocket mTLS support becomes available. mTLS never replaces JWS validation. See [`mtls-authentication.md`](./mtls-authentication.md) for the supported gRPC flow.
 
 ### Audio and runtime constraints
 

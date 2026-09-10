@@ -62,7 +62,7 @@ A **Service App** is the integration framework BYoVA uses to register your commu
 
 1. Sign in to [Webex for Developers](https://developer.webex.com/create/docs/service-apps) and create a Service App.
 2. Add `spark-admin:datasource_read` and `spark-admin:datasource_write`.
-3. Add the data exchange domain without a scheme, path, wildcard, or port.
+3. Add the base data exchange domain without a scheme, path, wildcard, or port. For example, for `wss://internal.byova.com`, enter `byova.com`.
 4. Select the data-source schema ID for the transport in [Integration variants](#integration-variants-in-this-directory).
 5. Save the client ID and the one-time-displayed client secret in a secret manager.
 6. Submit the app for organization-admin approval.
@@ -176,7 +176,7 @@ For a complete reference implementation including JWKS retrieval, key caching, c
 A few things worth thinking about before you go live:
 
 - **Health and readiness.** Expose deployment health and readiness checks for your own load balancers and operations tooling. Keep them separate from the BYoVA application `PING` and `PONG` heartbeat messages.
-- **mTLS.** Optional BYoVA mutual TLS applies to the gRPC variant. WebSocket uses server-authenticated TLS plus bearer-token validation.
+- **mTLS.** Optional BYoVA mutual TLS applies to the gRPC variant. Current WebSocket integrations use server-authenticated TLS plus bearer-token validation; follow the WebSocket setup guidance for the target environment as WebSocket mTLS support becomes available. mTLS does not replace JWS validation.
 - **Secrets handling.** Service-app tokens and any API keys for the upstream AI service must live in a managed secret store — never in source control or container images.
 - **Observability.** Capture the `conversation_id` on every session log so you can trace the call across Webex Contact Center and your virtual-agent stack without logging caller audio or credentials.
 

@@ -59,10 +59,10 @@ Create the app as the provider developer:
    - `spark-admin:datasource_read`
    - `spark-admin:datasource_write`
 6. Under **Data Exchange Schema**, select **VoiceVirtualAgent_WebSocket**, the WebSocket virtual-agent schema with the `web-socket` protocol for a Service App.
-7. Enter the partner-owned **Data Exchange Domain**, such as `byova.example.com`. Enter the domain only: omit the scheme, port, path, and wildcard characters.
+7. Enter the partner-owned base **Data Exchange Domain**, such as `byova.com` for a connector URL of `wss://internal.byova.com`. Enter the domain only: omit the scheme, port, path, and wildcard characters.
 8. Save the Service App.
 
-The host used in each data-source registration must fall within the authorized Data Exchange Domain. Record the application ID, schema ID, domain, and requested scopes in your onboarding system, but store the client secret separately.
+The host used in each data-source registration must be the authorized Data Exchange Domain or one of its subdomains. For example, register `byova.com` as the Data Exchange Domain for `wss://internal.byova.com`. Record the application ID, schema ID, domain, and requested scopes in your onboarding system, but store the client secret separately.
 
 For your own Webex organization, use **Request Admin Authorization** to make the app visible to its administrators. For a customer organization not affiliated with the developer, follow the current discovery, App Hub, and review rules in [Service Apps](https://developer.webex.com/create/docs/service-apps). Do not assume that saving the app makes it visible to every customer.
 
