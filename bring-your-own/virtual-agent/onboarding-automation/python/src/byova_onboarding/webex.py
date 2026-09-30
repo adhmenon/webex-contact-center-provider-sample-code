@@ -189,7 +189,7 @@ class WebexClient:
         ]
         if any(
             item.get("applicationId")
-            and item.get("applicationId") != self.settings.service_app_id
+            and item.get("applicationId") != self.settings.service_app_client_id
             for item in route_matches
         ):
             raise WebexAPIError("The intended route belongs to another Service App")
@@ -302,7 +302,10 @@ class WebexClient:
             raise WebexAPIError("Data Source did not become active")
         if payload.get("url") not in (None, self.settings.data_source_url):
             raise WebexAPIError("Data Source response contains an unexpected route")
-        if payload.get("applicationId") not in (None, self.settings.service_app_id):
+        if payload.get("applicationId") not in (
+            None,
+            self.settings.service_app_client_id,
+        ):
             raise WebexAPIError(
                 "Data Source response contains an unexpected Service App"
             )

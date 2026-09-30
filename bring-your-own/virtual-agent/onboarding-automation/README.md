@@ -79,8 +79,8 @@ Open `.env` and replace every placeholder. The supplied [`.env.example`](python/
 | `INTEGRATION_CLIENT_ID` | Provider OAuth Integration client ID |
 | `INTEGRATION_CLIENT_SECRET` | Provider OAuth Integration secret |
 | `INTEGRATION_REDIRECT_URI` | Exact HTTPS callback URI registered on the Integration |
-| `SERVICE_APP_ID` | Application ID used in webhook filters and the application-token path |
-| `SERVICE_APP_CLIENT_ID` | Service App OAuth client ID |
+| `SERVICE_APP_ID` | Service App `id` used in webhook filters and the application-token path |
+| `SERVICE_APP_CLIENT_ID` | Service App OAuth `clientId`, also returned as Data Source `applicationId` |
 | `SERVICE_APP_CLIENT_SECRET` | Service App secret used for customer token retrieval and refresh |
 | `WEBHOOK_TARGET_URL` | Public HTTPS URL for `/webhooks/service-app` |
 | `WEBHOOK_SECRET` | Long, random shared secret used to verify `X-Spark-Signature` |
@@ -185,7 +185,7 @@ The Webex API sequence is:
 1. It converts the response into a customer-specific `OAuthTokens` record.
 1. It calls `GET /datasources` with the customer-specific Service App access token.
 1. It compares returned records with the configured `BYOVA_DATA_SOURCE_URL`.
-1. It rejects the route if any URL match has an `applicationId` that identifies another Service App, and rejects an ambiguous result when several records use the route.
+1. It rejects the route if any URL match has an `applicationId` different from the configured Service App client ID, and rejects an ambiguous result when several records use the route.
 1. If no record matches, it sends `POST /datasources` with the approved schema, configured URL, audience, subject, a fresh nonce, and token lifetime.
 1. If exactly one acceptable route matches, it sends `PUT /datasources/{DATA_SOURCE_ID}` with the complete configured payload and `status: active`.
 1. It requires a response ID. When the response supplies status, URL, application ID, or schema, the sample requires active status and the expected route, Service App, and schema.
@@ -238,7 +238,7 @@ After installing the development dependencies, run the suite from the Python sam
 python -m pytest
 ```
 
-The current suite contains 13 tests. A successful run reports `13 passed`. The tests cover:
+The current suite contains 14 tests. A successful run reports `14 passed`. The tests cover:
 
 - Exact Integration scopes and OAuth state in the authorization URL.
 - Expiring, single-use OAuth state behavior.
@@ -246,6 +246,7 @@ The current suite contains 13 tests. A successful run reports `13 passed`. The t
 - Separate customer Service App token refresh.
 - Data Source create request shape.
 - Data Source renewal with the complete update payload and `status: active`.
+- Reconciliation of an existing Data Source whose `applicationId` matches the Service App client ID.
 - Rejection of a configured route already owned by a different Service App.
 - Creation of only a missing exact-match lifecycle webhook.
 - Exact-raw-byte HMAC verification.
@@ -334,4 +335,4 @@ Use a Contact Center sandbox to verify the complete lifecycle after the local te
 1. Verify your production extension separately disables the actual customer route; the supplied sample has no gateway hook.
 1. Have the customer enter the Data Source ID as the Resource Identifier, publish the intended Flow Designer flow, and run an end-to-end call through the selected [gRPC](../grpc-interface/README.md) or [WebSocket](../web-socket-interface/README.md) implementation.
 
-Passing the 13 local tests proves the sample's mocked contracts. Creating a Data Source proves provider-side control-plane provisioning. Neither result proves public webhook delivery, runtime JWS validation, gateway readiness, customer flow configuration, or end-to-end call routing. Treat the published customer call as the final acceptance test.
+Passing the 14 local tests proves the sample's mocked contracts. Creating a Data Source proves provider-side control-plane provisioning. Neither result proves public webhook delivery, runtime JWS validation, gateway readiness, customer flow configuration, or end-to-end call routing. Treat the published customer call as the final acceptance test.

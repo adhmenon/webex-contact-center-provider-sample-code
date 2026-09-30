@@ -124,6 +124,7 @@ async def test_data_source_create_uses_current_rest_shape(settings: Settings) ->
             200,
             json={
                 "id": "datasource-id",
+                "applicationId": settings.service_app_client_id,
                 "status": "active",
                 "url": request_body["url"],
                 "jwsToken": "secret-jws",
@@ -161,6 +162,7 @@ async def test_data_source_renewal_sends_full_active_update(settings: Settings) 
             200,
             json={
                 "id": "datasource-id",
+                "applicationId": settings.service_app_client_id,
                 "schemaId": "schema-id",
                 "status": "active",
                 "url": body["url"],
@@ -185,6 +187,48 @@ async def test_data_source_renewal_sends_full_active_update(settings: Settings) 
         "tokenLifeMinutes": "60",
         "status": "active",
     }
+
+
+@pytest.mark.asyncio
+async def test_data_source_reconciliation_accepts_own_client_id(
+    settings: Settings,
+) -> None:
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        if request.method == "GET":
+            return httpx.Response(
+                200,
+                json={
+                    "items": [
+                        {
+                            "id": "datasource-id",
+                            "url": settings.data_source_url,
+                            "applicationId": settings.service_app_client_id,
+                        }
+                    ]
+                },
+            )
+        return httpx.Response(
+            200,
+            json={
+                "id": "datasource-id",
+                "url": settings.data_source_url,
+                "applicationId": settings.service_app_client_id,
+                "status": "active",
+                "jwsToken": "renewed-jws",
+                "tokenExpiryTime": "2026-09-29T13:00:00Z",
+            },
+        )
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http:
+        client = WebexClient(settings, InMemoryStore(), http)
+        data_source, _ = await client.reconcile_data_source("customer-access")
+
+    assert data_source["id"] == "datasource-id"
+    assert [request.method for request in seen] == ["GET", "PUT"]
+    assert seen[1].url.path == "/v1/datasources/datasource-id"
 
 
 @pytest.mark.asyncio
